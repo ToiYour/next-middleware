@@ -1,25 +1,27 @@
-import { IMiddleware } from './type'
+import { IMiddleware, MiddlewareContext } from './type'
 import { NextResponse } from 'next/server'
 
 export const roleMiddleware: IMiddleware = {
-  matcher: /^\/admin/,
-  excluded: /^\/login$/,
+  matcher: /^\/admin\/(users|settings)/,
+  excluded: /^$/,
 
-  handle: async (req, res) => {
-    const accessToken =  req.cookies.get('accessToken')?.value|| res?.cookies.get('accessToken')?.value
-    if (!accessToken) return NextResponse.redirect(new URL('/login', req.url))
+  handle: async (req, res, context: MiddlewareContext = {}) => {
+    const user = context.user
 
-    try {
-      const payload = JSON.parse(atob(accessToken.split('.')[1]))
-      console.log("🚀 ~ handle: ~ payload:", payload)
+    console.log("🔵 Role middleware - user:", user ? 'exists' : 'none')
 
-      if (payload.role !== 'admin') {
-        return NextResponse.redirect(new URL('/', req.url))
-      }
-    } catch {
+    if (!user) {
+      console.log("❌ No user in context")
       return NextResponse.redirect(new URL('/login', req.url))
     }
 
+    // Kiểm tra role (ví dụ)
+    if (user.role !== 'admin') {
+      console.log("❌ Insufficient permissions")
+      return NextResponse.redirect(new URL('/unauthorized', req.url))
+    }
+
+    console.log("✅ Role check passed")
     return res
   }
 }

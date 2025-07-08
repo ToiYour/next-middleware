@@ -1,14 +1,14 @@
-'use client'
-import { useCurrentUser } from '@/hooks/useCurrentUser'
+import { serverFetch } from "@/utils/fetch"
 
-export default function Header() {
-  const user = useCurrentUser()
+export default async function Header() {
+  const data = await serverFetch(`/profile`) as {user:{id:number, username:string} & Record<'username' | 'role',string>}
 
+  console.log("🚀 ~ Header ~ user:", data?.user)
   return (
     <header className="p-4 border-b">
-      {user ? (
+      {data?.user ? (
         <div>
-          Welcome, <strong>{user.username}</strong> ({user.role})
+          Welcome, <strong>{data?.user.username}</strong> ({data?.user.role})
         </div>
       ) : (
         <div>Not logged in</div>

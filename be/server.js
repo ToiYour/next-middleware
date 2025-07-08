@@ -41,7 +41,7 @@ const generateAccessToken = (user) => {
     { id: user.id, username: user.username, role:user?.role },
     ACCESS_TOKEN_SECRET,
     {
-      expiresIn: "60",
+      expiresIn: "30",
     }
   );
 };
@@ -86,7 +86,9 @@ app.post("/api/login", (req, res) => {
 // Middleware xác thực
 const authenticate = (req, res, next) => {
   const authHeader = req.headers["authorization"];
+  console.log("🚀 ~ authenticate ~ authHeader:", authHeader)
   const token = authHeader && authHeader.split(" ")[1];
+  console.log("🚀 ~ authenticate ~ token:", token)
 
   if (!token) return res.status(401).json({ message: "No token provided" });
 
@@ -95,6 +97,7 @@ const authenticate = (req, res, next) => {
     req.user = decoded;
     next();
   } catch (error) {
+    console.log("🚀 ~ authenticate ~ error:", error)
     return res.status(403).json({ message: "Invalid token" });
   }
 };
